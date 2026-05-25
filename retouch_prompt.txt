@@ -1,0 +1,21 @@
+目标：在保留人物身份、发型、服装、姿势和四视图构图不变的前提下，让面部更接近真实摄影质感。
+
+正向提示词（可用于 SDXL / Flux 图像编辑）：
+photorealistic face, natural skin texture, realistic pores, subtle fine wrinkles, micro skin details, accurate facial anatomy, natural asymmetry, realistic eyes with catchlight, realistic lips texture, cinematic soft studio lighting, high dynamic range, 85mm lens portrait look, ultra detailed, true-to-life color, consistent identity, preserve clothing and pose, preserve multi-view layout
+
+反向提示词：
+plastic skin, over-smooth face, waxy texture, uncanny valley, cartoon, cgi, doll face, over-sharpen, beauty filter, excessive makeup, distorted eyes, asymmetrical pupils, deformed mouth, blur, lowres
+
+建议参数：
+- denoise strength: 0.25 ~ 0.38（只增强真实感，不改脸）
+- CFG: 4.5 ~ 6.5
+- steps: 28 ~ 40
+- face/detailer pass: 1 次（强度 0.2 ~ 0.3）
+- upscaler: 1.5x ~ 2x（轻度）
+
+局部修饰建议（仅面部蒙版）：
+1) 额头与眼下增加轻微皮肤细节与毛孔层次。
+2) 保持法令纹、眼周纹理自然，不要磨皮。
+3) 虹膜边缘与高光更自然，避免“玻璃眼”。
+4) 嘴唇加入轻微纵向纹理与湿润高光。
+5) 保持左右脸轻微不对称，避免 AI 过度对称。
