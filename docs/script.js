@@ -134,7 +134,7 @@ function updateHelperText(extraText = "") {
       message += ` ${formatLabel(format)} 会优先调质量，必要时再缩尺寸。当前质量上限 ${quality}%。`;
     }
   } else if (format === "image/png") {
-    message = "PNG 默认只做去 alpha 和无损优化。如果你还有得太大，填写目标 MB 后才会继续尝试 256 色量化，但不会缩尺寸。";
+    message = "PNG 默认只做去 alpha 和无损优化。如果你还觉得太大，填写目标 MB 后才会继续尝试 256 色量化，但不会缩尺寸。";
   } else if (format === "original") {
     message = `当前质量 ${quality}%。原格式导出会尽量保留原格式；如果遇到 PNG，默认只做去 alpha 和无损优化。`;
   } else {
@@ -176,7 +176,7 @@ async function compressAll() {
 }
 
 async function compressImage(file, options) {
-  const bitmap = await createImageBitmap(file);
+  const bitmap = await loadImageSource(file);
   const size = fitSize(
     bitmap.width,
     bitmap.height,
@@ -194,7 +194,9 @@ async function compressImage(file, options) {
   const savedBytes = Math.max(0, file.size - exported.finalBlob.size);
   const savedPercent = file.size ? (savedBytes / file.size) * 100 : 0;
 
-  bitmap.close();
+  if (typeof bitmap.close === "function") {
+    bitmap.close();
+  }
 
   return {
     name: file.name,
@@ -659,19 +661,29 @@ async function exportPngLosslessAttempt(canvas) {
   );
 
   const rgb = rgbaToRgb(imageData.data);
-  const encoded = UPNG.encodeLL(
-    [rgb.buffer],
-    canvas.width,
-    canvas.height,
-    3,
-    0,
-    8,
-  );
+  try {
+    const encoded = UPNG.encodeLL(
+      [rgb.buffer],
+      canvas.width,
+      canvas.height,
+      3,
+      0,
+      8,
+    );
 
-  return {
-    blob: new Blob([encoded], {type: "image/png"}),
-    qualityUsed: null,
-  };
+    if (!encoded || !encoded.byteLength) {
+      throw new Error("UPNG lossless encoder returned empty data.");
+    }
+
+    return {
+      blob: new Blob([encoded], {type: "image/png"}),
+      qualityUsed: null,
+    };
+  } catch (error) {
+    console.warn("PNG lossless optimization unavailable, using native export.", error);
+    const blob = await canvasToBlob(canvas, "image/png");
+    return {blob, qualityUsed: null};
+  }
 }
 
 async function exportPngQuantizedAttempt(canvas, colorCount) {
@@ -691,17 +703,27 @@ async function exportPngQuantizedAttempt(canvas, colorCount) {
     canvas.width,
     canvas.height,
   );
-  const encoded = UPNG.encode(
-    [imageData.data.buffer],
-    canvas.width,
-    canvas.height,
-    colorCount,
-  );
+  try {
+    const encoded = UPNG.encode(
+      [imageData.data.buffer],
+      canvas.width,
+      canvas.height,
+      colorCount,
+    );
 
-  return {
-    blob: new Blob([encoded], {type: "image/png"}),
-    qualityUsed: null,
-  };
+    if (!encoded || !encoded.byteLength) {
+      throw new Error("UPNG quantized encoder returned empty data.");
+    }
+
+    return {
+      blob: new Blob([encoded], {type: "image/png"}),
+      qualityUsed: null,
+    };
+  } catch (error) {
+    console.warn("PNG quantization unavailable, using native export.", error);
+    const blob = await canvasToBlob(canvas, "image/png");
+    return {blob, qualityUsed: null};
+  }
 }
 
 function rgbaToRgb(rgba) {
@@ -719,11 +741,25 @@ function rgbaToRgb(rgba) {
 
 function canvasToBlob(canvas, outputType, quality) {
   return new Promise((resolve, reject) => {
+    if (typeof canvas.toBlob !== "function") {
+      try {
+        resolve(dataUrlToBlob(canvas.toDataURL(outputType, quality)));
+      } catch (error) {
+        reject(error);
+      }
+      return;
+    }
+
     canvas.toBlob(
       (blob) => {
         if (!blob) {
-          reject(new Error("Failed to export canvas."));
-          return;
+          try {
+            resolve(dataUrlToBlob(canvas.toDataURL(outputType, quality)));
+            return;
+          } catch (error) {
+            reject(new Error("Failed to export canvas."));
+            return;
+          }
         }
 
         resolve(blob);
@@ -732,6 +768,51 @@ function canvasToBlob(canvas, outputType, quality) {
       quality,
     );
   });
+}
+
+async function loadImageSource(file) {
+  if (typeof createImageBitmap === "function") {
+    try {
+      return await createImageBitmap(file);
+    } catch (error) {
+      console.warn("createImageBitmap failed, falling back to HTMLImageElement.", error);
+    }
+  }
+
+  return await loadImageElement(file);
+}
+
+function loadImageElement(file) {
+  return new Promise((resolve, reject) => {
+    const objectUrl = URL.createObjectURL(file);
+    const image = new Image();
+
+    image.onload = () => {
+      URL.revokeObjectURL(objectUrl);
+      resolve(image);
+    };
+
+    image.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      reject(new Error("Failed to decode image file."));
+    };
+
+    image.src = objectUrl;
+  });
+}
+
+function dataUrlToBlob(dataUrl) {
+  const [header, payload] = dataUrl.split(",");
+  const mimeMatch = /data:([^;]+)/.exec(header);
+  const mimeType = mimeMatch ? mimeMatch[1] : "application/octet-stream";
+  const binary = atob(payload);
+  const bytes = new Uint8Array(binary.length);
+
+  for (let index = 0; index < binary.length; index += 1) {
+    bytes[index] = binary.charCodeAt(index);
+  }
+
+  return new Blob([bytes], {type: mimeType});
 }
 
 function clamp(value, min, max) {
