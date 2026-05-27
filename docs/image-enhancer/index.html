@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+    <meta
+      name="description"
+      content="ClarityLab 是一个本地运行的图片清晰度提升网站，支持放大、锐化、细节增强、降噪和下载。"
+    />
+    <meta name="theme-color" content="#07131f" />
+    <title>ClarityLab | 图片清晰度提升</title>
+    <link rel="icon" href="./assets/logo.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <div class="glow glow-left"></div>
+      <div class="glow glow-right"></div>
+
+      <main class="app-card">
+        <section class="brand-bar">
+          <div class="brand-lockup">
+            <img
+              class="brand-logo"
+              src="./assets/logo.svg"
+              alt="ClarityLab logo"
+            />
+            <div>
+              <p class="brand-name">ClarityLab</p>
+              <p class="brand-subtitle">Local image enhancer</p>
+            </div>
+          </div>
+          <div class="brand-chip">Sharpen · Upscale · Clean</div>
+        </section>
+
+        <section class="hero">
+          <p class="eyebrow">Photo Repair Studio</p>
+          <h1>图片清晰度提升</h1>
+          <p class="hero-copy">
+            适合把模糊、发灰、细节不够的图片做一次本地增强。支持放大倍率、锐化、细节增强、降噪和导出。
+          </p>
+        </section>
+
+        <section class="control-grid">
+          <label class="control-card dropzone" for="file-input" id="dropzone">
+            <input
+              id="file-input"
+              type="file"
+              accept="image/*"
+              hidden
+            />
+            <span class="dropzone-icon">+</span>
+            <strong>选择图片或拖拽到这里</strong>
+            <span>适合照片、电商图、截图和二次上传前优化</span>
+          </label>
+
+          <div class="control-card settings-card">
+            <div class="field two-columns">
+              <div>
+                <label for="upscale-factor">放大倍率</label>
+                <select id="upscale-factor">
+                  <option value="1">1x 保持原尺寸</option>
+                  <option value="1.5">1.5x</option>
+                  <option value="2" selected>2x</option>
+                  <option value="3">3x</option>
+                  <option value="4">4x</option>
+                </select>
+              </div>
+              <div>
+                <label for="target-size-mb">最终大小（每张 / MB）</label>
+                <input
+                  id="target-size-mb"
+                  type="number"
+                  min="0"
+                  step="0.1"
+                  placeholder="例如 1.0"
+                />
+              </div>
+            </div>
+
+            <div class="field">
+              <div>
+                <label for="output-format">输出格式</label>
+                <select id="output-format">
+                  <option value="image/jpeg" selected>JPEG</option>
+                  <option value="image/webp">WebP</option>
+                  <option value="image/png">PNG</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="field slider-field">
+              <div class="field-head">
+                <label for="sharpen-strength">锐化强度</label>
+                <output id="sharpen-value">55</output>
+              </div>
+              <input
+                id="sharpen-strength"
+                type="range"
+                min="0"
+                max="160"
+                value="55"
+              />
+            </div>
+
+            <div class="field slider-field">
+              <div class="field-head">
+                <label for="clarity-strength">细节增强</label>
+                <output id="clarity-value">35</output>
+              </div>
+              <input
+                id="clarity-strength"
+                type="range"
+                min="0"
+                max="120"
+                value="35"
+              />
+            </div>
+
+            <div class="field slider-field">
+              <div class="field-head">
+                <label for="denoise-strength">降噪平滑</label>
+                <output id="denoise-value">10</output>
+              </div>
+              <input
+                id="denoise-strength"
+                type="range"
+                min="0"
+                max="100"
+                value="10"
+              />
+            </div>
+
+            <div class="field slider-field">
+              <div class="field-head">
+                <label for="export-quality">导出质量</label>
+                <output id="quality-value">92%</output>
+              </div>
+              <input
+                id="export-quality"
+                type="range"
+                min="40"
+                max="100"
+                value="92"
+              />
+            </div>
+
+            <div class="action-row">
+              <button id="enhance-btn" class="primary-btn" type="button">
+                开始增强
+              </button>
+              <button id="reset-btn" class="ghost-btn" type="button">
+                恢复默认
+              </button>
+              <button id="download-btn" class="ghost-btn" type="button" disabled>
+                下载结果
+              </button>
+            </div>
+
+            <p class="helper-text" id="helper-text">
+              这是浏览器本地增强工具，适合清晰度优化和放大，不是云端 AI 补图。
+            </p>
+          </div>
+        </section>
+
+        <section class="status-bar">
+          <div class="status-pill">
+            <span>原图尺寸</span>
+            <strong id="original-dimensions">-</strong>
+          </div>
+          <div class="status-pill">
+            <span>结果尺寸</span>
+            <strong id="enhanced-dimensions">-</strong>
+          </div>
+          <div class="status-pill">
+            <span>原图大小</span>
+            <strong id="original-size">-</strong>
+          </div>
+          <div class="status-pill">
+            <span>导出大小</span>
+            <strong id="enhanced-size">-</strong>
+          </div>
+        </section>
+
+        <section class="preview-panel">
+          <div class="results-head">
+            <h2>前后对比</h2>
+            <p>左边原图，右边增强结果。</p>
+          </div>
+
+          <div class="preview-grid">
+            <article class="preview-card" id="original-card" hidden>
+              <div class="preview-label">原图</div>
+              <div class="preview-canvas-shell" id="original-shell">
+                <canvas id="original-canvas"></canvas>
+              </div>
+            </article>
+
+            <article class="preview-card" id="enhanced-card" hidden>
+              <div class="preview-label">增强结果</div>
+              <div class="preview-canvas-shell" id="enhanced-shell">
+                <canvas id="enhanced-canvas"></canvas>
+              </div>
+            </article>
+          </div>
+
+          <div id="empty-state" class="empty-state">
+            <strong>还没有图片</strong>
+            <span>上传一张图片后，这里会显示增强前后的对比预览。</span>
+          </div>
+        </section>
+
+        <footer class="app-footer">
+          <span>ClarityLab</span>
+          <span>本地运行，不上传图片</span>
+        </footer>
+      </main>
+    </div>
+
+    <script src="./script.js"></script>
+  </body>
+</html>
