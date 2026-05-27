@@ -8,7 +8,7 @@
     />
     <meta
       name="description"
-      content="SqueezeLab 是一个本地运行的图片压缩工具，支持批量上传、质量调节、尺寸限制和格式转换。"
+      content="SqueezeLab 是一个本地运行的图片压缩工具，支持批量上传、质量调节、尺寸限制、目标体积和格式转换。"
     />
     <meta name="theme-color" content="#08111f" />
     <title>SqueezeLab | 图片压缩工具</title>
@@ -40,7 +40,7 @@
           <p class="eyebrow">SqueezeLab Studio</p>
           <h1>图片压缩工具</h1>
           <p class="hero-copy">
-            拖进来就能压。支持批量处理、尺寸限制、质量调节和格式转换，全部在浏览器本地完成，适合直接分享给别人使用。
+            拖进来就能压。支持批量处理、尺寸限制、质量调节、目标体积和格式转换，全部在浏览器本地完成。
           </p>
         </section>
 
@@ -59,20 +59,6 @@
           </label>
 
           <div class="control-card settings-card">
-            <div class="field">
-              <label for="quality">压缩质量</label>
-              <div class="range-row">
-                <input
-                  id="quality"
-                  type="range"
-                  min="10"
-                  max="100"
-                  value="78"
-                />
-                <output id="quality-value">78%</output>
-              </div>
-            </div>
-
             <div class="field two-columns">
               <div>
                 <label for="max-width">最大宽度</label>
@@ -86,6 +72,16 @@
 
             <div class="field two-columns">
               <div>
+                <label for="target-size-mb">最终大小（每张 / MB）</label>
+                <input
+                  id="target-size-mb"
+                  type="number"
+                  min="0"
+                  step="0.1"
+                  placeholder="例如 1.0"
+                />
+              </div>
+              <div>
                 <label for="output-format">输出格式</label>
                 <select id="output-format">
                   <option value="original">保持原格式</option>
@@ -93,6 +89,22 @@
                   <option value="image/webp" selected>WebP</option>
                   <option value="image/png">PNG</option>
                 </select>
+              </div>
+            </div>
+
+            <div class="field two-columns">
+              <div>
+                <label for="quality">质量上限</label>
+                <div class="range-row">
+                  <input
+                    id="quality"
+                    type="range"
+                    min="10"
+                    max="100"
+                    value="78"
+                  />
+                  <output id="quality-value">78%</output>
+                </div>
               </div>
               <div>
                 <label for="background-color">JPEG 背景色</label>
