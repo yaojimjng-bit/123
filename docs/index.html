@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+    <meta
+      name="description"
+      content="SqueezeLab 是一个本地运行的图片压缩工具，支持批量上传、质量调节、尺寸限制和格式转换。"
+    />
+    <meta name="theme-color" content="#08111f" />
+    <title>SqueezeLab | 图片压缩工具</title>
+    <link rel="icon" href="./assets/logo.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <div class="ambient ambient-left"></div>
+      <div class="ambient ambient-right"></div>
+
+      <main class="app-card">
+        <section class="brand-bar">
+          <div class="brand-lockup">
+            <img
+              class="brand-logo"
+              src="./assets/logo.svg"
+              alt="SqueezeLab logo"
+            />
+            <div>
+              <p class="brand-name">SqueezeLab</p>
+              <p class="brand-subtitle">Local-first image compression</p>
+            </div>
+          </div>
+          <div class="brand-chip">Ready To Share</div>
+        </section>
+
+        <section class="hero">
+          <p class="eyebrow">SqueezeLab Studio</p>
+          <h1>图片压缩工具</h1>
+          <p class="hero-copy">
+            拖进来就能压。支持批量处理、尺寸限制、质量调节和格式转换，全部在浏览器本地完成，适合直接分享给别人使用。
+          </p>
+        </section>
+
+        <section class="control-grid">
+          <label class="control-card dropzone" for="file-input" id="dropzone">
+            <input
+              id="file-input"
+              type="file"
+              accept="image/*"
+              multiple
+              hidden
+            />
+            <span class="dropzone-icon">+</span>
+            <strong>选择图片或拖拽到这里</strong>
+            <span>支持 JPG、PNG、WebP、GIF 静态帧等浏览器可解码格式</span>
+          </label>
+
+          <div class="control-card settings-card">
+            <div class="field">
+              <label for="quality">压缩质量</label>
+              <div class="range-row">
+                <input
+                  id="quality"
+                  type="range"
+                  min="10"
+                  max="100"
+                  value="78"
+                />
+                <output id="quality-value">78%</output>
+              </div>
+            </div>
+
+            <div class="field two-columns">
+              <div>
+                <label for="max-width">最大宽度</label>
+                <input id="max-width" type="number" min="0" value="1920" />
+              </div>
+              <div>
+                <label for="max-height">最大高度</label>
+                <input id="max-height" type="number" min="0" value="1920" />
+              </div>
+            </div>
+
+            <div class="field two-columns">
+              <div>
+                <label for="output-format">输出格式</label>
+                <select id="output-format">
+                  <option value="original">保持原格式</option>
+                  <option value="image/jpeg">JPEG</option>
+                  <option value="image/webp" selected>WebP</option>
+                  <option value="image/png">PNG</option>
+                </select>
+              </div>
+              <div>
+                <label for="background-color">JPEG 背景色</label>
+                <input id="background-color" type="color" value="#0f172a" />
+              </div>
+            </div>
+
+            <div class="action-row">
+              <button id="compress-btn" class="primary-btn" type="button">
+                开始压缩
+              </button>
+              <button id="download-all-btn" class="ghost-btn" type="button" disabled>
+                下载全部
+              </button>
+            </div>
+
+            <p class="helper-text" id="helper-text">
+              质量参数对 JPEG / WebP 更明显；PNG 更适合保真导出。
+            </p>
+          </div>
+        </section>
+
+        <section class="status-bar">
+          <div class="status-pill">
+            <span>已选择</span>
+            <strong id="file-count">0 张</strong>
+          </div>
+          <div class="status-pill">
+            <span>原始总大小</span>
+            <strong id="original-total">0 B</strong>
+          </div>
+          <div class="status-pill">
+            <span>压缩后总大小</span>
+            <strong id="compressed-total">0 B</strong>
+          </div>
+          <div class="status-pill">
+            <span>总体节省</span>
+            <strong id="saved-total">0%</strong>
+          </div>
+        </section>
+
+        <section class="results-panel">
+          <div class="results-head">
+            <h2>处理结果</h2>
+            <p>每张图片都可以单独预览和下载。</p>
+          </div>
+          <div id="empty-state" class="empty-state">
+            <strong>还没有图片</strong>
+            <span>把图片拖进上面的区域，或者点击选择文件。</span>
+          </div>
+          <div id="results" class="results-grid" aria-live="polite"></div>
+        </section>
+
+        <footer class="app-footer">
+          <span>SqueezeLab</span>
+          <span>本地处理，不上传图片</span>
+        </footer>
+      </main>
+    </div>
+
+    <script src="./script.js"></script>
+  </body>
+</html>
